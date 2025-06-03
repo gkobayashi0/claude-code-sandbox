@@ -194,6 +194,15 @@
             font-size: 14px;
         }
 
+        .todo-assignee {
+            padding: 4px 12px;
+            background: #e3f2fd;
+            color: #1565c0;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
         .todo-actions {
             display: flex;
             gap: 10px;
@@ -250,6 +259,7 @@
         <div class="add-todo">
             <div class="input-group">
                 <input type="text" id="todoInput" placeholder="新しいタスクを入力してください..." maxlength="100">
+                <input type="text" id="assigneeInput" placeholder="担当者を入力してください..." maxlength="50">
                 <select id="prioritySelect">
                     <option value="low">低優先度</option>
                     <option value="medium" selected>中優先度</option>
@@ -298,8 +308,10 @@
 
         function addTodo() {
             const input = document.getElementById('todoInput');
+            const assigneeInput = document.getElementById('assigneeInput');
             const priority = document.getElementById('prioritySelect').value;
             const text = input.value.trim();
+            const assignee = assigneeInput.value.trim();
 
             if (text === '') {
                 alert('タスクを入力してください');
@@ -311,11 +323,13 @@
                 text: text,
                 completed: false,
                 priority: priority,
+                assignee: assignee || '未割り当て',
                 createdAt: new Date().toLocaleString('ja-JP')
             };
 
             todos.unshift(todo);
             input.value = '';
+            assigneeInput.value = '';
             
             saveTodos();
             renderTodos();
@@ -347,6 +361,18 @@
                 const newText = prompt('タスクを編集:', todo.text);
                 if (newText !== null && newText.trim() !== '') {
                     todo.text = newText.trim();
+                    saveTodos();
+                    renderTodos();
+                }
+            }
+        }
+
+        function editAssignee(id) {
+            const todo = todos.find(todo => todo.id === id);
+            if (todo) {
+                const newAssignee = prompt('担当者を編集:', todo.assignee === '未割り当て' ? '' : todo.assignee);
+                if (newAssignee !== null) {
+                    todo.assignee = newAssignee.trim() || '未割り当て';
                     saveTodos();
                     renderTodos();
                 }
@@ -399,6 +425,7 @@
                     <input type="checkbox" class="todo-checkbox" ${todo.completed ? 'checked' : ''} 
                            onchange="toggleTodo(${todo.id})">
                     <div class="todo-text">${escapeHtml(todo.text)}</div>
+                    <div class="todo-assignee" onclick="editAssignee(${todo.id})" style="cursor: pointer;" title="クリックして担当者を変更">${escapeHtml(todo.assignee || '未割り当て')}</div>
                     <div class="todo-priority priority-${todo.priority}">${getPriorityText(todo.priority)}</div>
                     <div class="todo-date">${todo.createdAt}</div>
                     <div class="todo-actions">
@@ -454,6 +481,7 @@
                     text: "プロジェクトの企画書を作成する",
                     completed: false,
                     priority: "high",
+                    assignee: "田中さん",
                     createdAt: new Date().toLocaleString('ja-JP')
                 },
                 {
@@ -461,6 +489,7 @@
                     text: "週次会議の準備をする",
                     completed: true,
                     priority: "medium",
+                    assignee: "佐藤さん",
                     createdAt: new Date().toLocaleString('ja-JP')
                 },
                 {
@@ -468,6 +497,7 @@
                     text: "メールの返信をする",
                     completed: false,
                     priority: "low",
+                    assignee: "未割り当て",
                     createdAt: new Date().toLocaleString('ja-JP')
                 }
             ];
